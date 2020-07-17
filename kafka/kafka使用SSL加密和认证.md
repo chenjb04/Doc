@@ -13,7 +13,7 @@ mkdir root client server trust
 2、为每个Kafka broker生成SSL密钥和证书
 
 ```shell
-keytool -keystore /usr/ca/server/server.keystore.jks -alias localhost -validity 365 -genkey -keypass 123123 -keyalg RSA  -storepass 123123 -ext SAN=DNS:localhost -dname "CN=localhost,OU=antiy,O=antiy,L=haerbin,S=haerbin,C=cn"
+keytool -keystore /usr/ca/server/server.keystore.jks -alias localhost -validity 365 -genkey -keypass 123123 -storepass 123123 -dname "CN=localhost,OU=antiy,O=antiy,L=haerbin,S=haerbin,C=cn"
 ```
 
 验证证书内容
@@ -63,7 +63,7 @@ keytool -keystore /usr/ca/server/server.keystore.jks -alias CARoot -import -file
 - 将已签名的服务器证书导入到服务器keystore
 
 ```shell
-keytool -keystore /usr/ca/server/server.keystore.jks -alias ds-kafka-single -import -file /usr/ca/server/server.cert-signed -storepass 123123
+keytool -keystore /usr/ca/server/server.keystore.jks -alias localhost -import -file /usr/ca/server/server.cert-signed -storepass 123123
 ```
 
 7、客户端SSL证书签发
@@ -102,13 +102,13 @@ keytool -keystore /usr/ca/client/client.keystore.jks -alias localhost -import -f
 
 ````shell
 
-listeners=SSL://kafka-single:9095
-advertised.listeners=SSL://kafka-single:9095
+listeners=SSL://ip:9095
+advertised.listeners=SSL://ip:9095
 ssl.keystore.location=/usr/ca/server/server.keystore.jks
-ssl.keystore.password=ds1994
-ssl.key.password=ds1994
+ssl.keystore.password=123123
+ssl.key.password=123123
 ssl.truststore.location=/usr/ca/trust/server.truststore.jks
-ssl.truststore.password=ds1994
+ssl.truststore.password=123123
 ssl.client.auth=required
 ssl.enabled.protocols=TLSv1.2,TLSv1.1,TLSv1
 ssl.keystore.type=JKS 
