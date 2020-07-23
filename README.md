@@ -9,7 +9,10 @@
 
 [3、shell替换](https://github.com/chenjb04/Doc/blob/master/shell/3、shell替换.md)
 
+[4、shell运算符](https://github.com/chenjb04/Doc/blob/master/shell/4、shell运算符.md)
+
 # kafka
 
 [kafka使用SSL加密和认证](https://github.com/chenjb04/Doc/blob/master/kafka/kafka使用SSL加密和认证.md)
 
+​	
