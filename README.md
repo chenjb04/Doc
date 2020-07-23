@@ -13,6 +13,8 @@
 
 [5、shell字符串和数组](https://github.com/chenjb04/Doc/blob/master/shell/5、shell字符串和数组.md)
 
+[6、if else语句](https://github.com/chenjb04/Doc/blob/master/shell/6、if else语句.md)
+
 # kafka
 
 [kafka使用SSL加密和认证](https://github.com/chenjb04/Doc/blob/master/kafka/kafka使用SSL加密和认证.md)
