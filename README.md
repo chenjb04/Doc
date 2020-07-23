@@ -7,6 +7,8 @@
 
 [2、shell变量](https://github.com/chenjb04/Doc/blob/master/shell/2、shell变量.md)
 
+[3、shell替换](https://github.com/chenjb04/Doc/blob/master/shell/3、shell替换.md)
+
 # kafka
 
 [kafka使用SSL加密和认证](https://github.com/chenjb04/Doc/blob/master/kafka/kafka使用SSL加密和认证.md)
