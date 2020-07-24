@@ -13,7 +13,7 @@
 
 [5、shell字符串和数组](https://github.com/chenjb04/Doc/blob/master/shell/5、shell字符串和数组.md)
 
-[6、if_else语句](https://github.com/chenjb04/Doc/blob/master/shell/6、if else语句.md)
+[6、if_else语句](https://github.com/chenjb04/Doc/blob/master/shell/6、if_else语句.md)
 
 # kafka
 
