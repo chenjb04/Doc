@@ -3,6 +3,8 @@
 
 [linux三剑客—grep](https://github.com/chenjb04/Doc/blob/master/linux/linux三剑客—grep.md)
 
+[linux三剑客—sed](https://github.com/chenjb04/Doc/blob/master/linux/linux三剑客—sed.md)
+
 # shell
 
 [1、shell基础](https://github.com/chenjb04/Doc/blob/master/shell/1、shell基础.md)
