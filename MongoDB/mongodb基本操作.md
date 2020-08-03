@@ -152,12 +152,18 @@ example
 
 MongoDB 向集合里插入记录时，无须事先对数据存储结构进行定义。如果待插入的集合不存在，则插入操作会默认创建集合。
 
-### 插入数据
+### insert
 
 语法
 
 ```
-db.COLLECTION_NAME.insert(document)
+db.collection.insert(
+   <document or array of documents>,
+   {
+     writeConcern: <document>,
+     ordered: <boolean>
+   }
+)
 ```
 
 实例
@@ -184,6 +190,19 @@ db.example.insert([{"name": "xiaozhang", "age": 20}, {"name":"xiaogang", "age": 
 
 ### insertOne
 
+语法
+
+```
+db.collection.insertOne(
+   <document>,
+   {
+      writeConcern: <document>
+   }
+)
+```
+
+
+
 插入一条文档
 
 ```
@@ -191,6 +210,22 @@ db.example.insert([{"name": "xiaozhang", "age": 20}, {"name":"xiaogang", "age": 
 ```
 
 ### insertMany
+
+语法
+
+```
+db.collection.insertMany(
+   [ <document 1> , <document 2>, ... ],
+   {
+      writeConcern: <document>,
+      ordered: <boolean>
+   }
+)
+```
+
+ordered表示插入时的顺序，默认true有序插入。
+
+**在插入多条时，如果遇到错误，剩余的文档将不会被插入，如果设置ordered为false，会继续插入剩余的文档。**
 
 插入多条文档
 
@@ -269,6 +304,18 @@ db.example.findOne()
 db.collection.find({key1:value1, key2:value2}).pretty()
 ```
 
+或者
+
+```
+db.collection.find(
+   {
+      $and: [
+         {key1: value1}, {key2:value2}
+      ]
+   }
+).pretty()
+```
+
 实例
 
 查询名字是xiaozhao并且年龄22
@@ -299,12 +346,155 @@ db.collection.find(
 db.example.find({$or:[{"age":{$gt:20}},{"name":"xiaogang"}]}).pretty()
 ```
 
-### 查询限定列
+### not
+
+查询年龄不大于20的文档
+
+```
+db.example.find({"age": {$not:{$gt:20}}})
+```
+
+### nor
+
+不属于
+
+查询年龄不等于17的文档
+
+```
+db.example.find( {$nor:[ {"age":17} ]})
+```
+
+### in nin
+
+比较运算符
+
+语法
+
+```
+{field : {$in: [<value1>, <value2>...]}}
+```
+
+实例
+
+查询年龄在17,18,20
+
+```
+db.example.find({"age": {$in:[17,18,20]}})
+```
+
+nin 不存在
+
+查询年龄不在17,18,20
+
+```
+db.example.find({"age": {$nin:[17,18,20]}})
+```
+
+### exists
+
+包含字段文档
+
+语法
+
+```
+{field : {$exists: <boolean>}}
+```
+
+实例
+
+查询包含age字段的值
+
+```
+db.example.find({"age":{$exists:true}})
+```
+
+### type
+
+字段类型
+
+语法
+
+```
+{field : {$type: <Bson type>}}
+```
+
+实例
+
+查询名字是string类型的文档
+
+```
+db.example.find({"name":{$type:"string"}})
+```
 
 1 表示 显示指定列 0表示不显示指定列
 
 ```
 db.example.find({},{"name":"1","_id": 0})
+```
+
+数组使用$slice
+
+返回contact·数组的第一个字段
+
+```
+db.example.find({}, {contact: {$slice:1}})
+```
+
+### 数组操作符
+
+插入数组文档
+
+```
+db.example.insert([{name:"jack",balance:2000,contact:["123456","Alabama", "US"]}, {name:"karen",balance:2500, contact:[["456", '454545'],"beijing", "china"]}])
+```
+
+#### all
+
+$all主要用来查询数组中的包含关系，查询条件中只要有一个不包含就不返回
+
+实例
+
+查询contact包含beiing和china的文档
+
+```
+db.example.find({contact: {$all: ["beijing", "china"]}}).pretty()
+```
+
+#### elemMatch
+
+$elemMatch 数组查询操作用于查询数组值中至少有一个能完全匹配所有的查询条件的文档
+
+查询contact值大于1小于900000000000的文档
+
+```
+db.example.find({contact: {$elemMatch: {$gt :"1", $lt:"90000000"}}}).pretty()
+```
+
+### regex
+
+正则表达式运算符
+
+语法
+
+```
+{field: {: /parttern/, : '<options>'}}
+{field: {: /parttern/<options>}}
+```
+
+在和$in一起使用时，只能使用第二种
+
+实例
+
+查询name已xiao开头或者j开头的文档
+
+```
+db.example.find({name: {$in : [/^xiao/,/^j/]}}).pretty()
+```
+
+查询名字包含ang且忽略大小写的文档
+
+```
+db.example.find({name: {$regex : /ang/, $options:"i"}}).pretty()
 ```
 
 ### limit
@@ -325,6 +515,8 @@ db.example.find().skip(1)
 
 跳过第一个结果，返回剩余的结果
 
+**skip在limit之前执行**
+
 ### count
 
 返回查询结果总个数
@@ -342,6 +534,8 @@ sort() 函数用于对查询结果进行排序，1 是升序，-1 是降序
 ```
 db.example.find().sort({"age": -1})
 ```
+
+**sort在skip之前执行**
 
 # 更新文档
 
@@ -384,6 +578,38 @@ update默认只更新符合条件的一条数据，如果要改变多条，需�
 ```
 db.example.update({"age": 18}, {$set:{"age": 20}},{multi:true})
 ```
+
+**文档id不可改变**
+
+#### 更新操作符
+
+##### set
+
+set 更新或者新增字段
+
+语法
+
+```
+{$set: {<field1>:<value1>}}
+```
+
+##### unset
+
+删除字段
+
+语法
+
+```
+{$set: {<field1>:""}}
+```
+
+实例
+
+```
+db.example.update({name: "xiaoli"},{$unset: {name:""}})
+```
+
+
 
 ### updateOne
 
