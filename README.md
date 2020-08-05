@@ -38,3 +38,5 @@
 [mongodb基本操作](https://github.com/chenjb04/Doc/blob/master/MongoDB/mongodb基本操作.md)
 
 [mongodb索引](https://github.com/chenjb04/Doc/blob/master/MongoDB/mongodb索引.md)
+
+[mongodb聚合管道](https://github.com/chenjb04/Doc/blob/master/MongoDB/mongodb聚合管道.md)
