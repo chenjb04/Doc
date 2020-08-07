@@ -609,7 +609,81 @@ set 更新或者新增字段
 db.example.update({name: "xiaoli"},{$unset: {name:""}})
 ```
 
+##### rename
 
+重命名字段
+
+语法
+
+```
+{$rename: {<field1>:<newname>}}
+```
+
+实例
+
+把lili的gender重命名为sex字段
+
+```
+db.student.update({name: "lili"},{$rename: {"gender": "sex"}}) 
+```
+
+#### 数组操作符
+
+##### addToSet
+
+往数组中添加元素
+
+如果数组中存在这个值，那么不会添加重复值
+
+实例
+
+往book数组中添加hhahah
+
+```
+db.books.update({"_id": "Homer"}, {$addToSet: {books: "hahha"}}
+```
+
+##### each
+
+插入内嵌数组时，值单独 处理
+
+实例
+
+```
+db.books.update({"_id": "Homer"}, {$addToSet: {"books": {$each: ['page', 'name']}}})
+```
+
+##### pop
+
+删除数组元素
+
+只能删除第一个(-1)或者最后一个(1) 删除最后一个元素后 会保留[]
+
+实例
+
+删除最后一个元素
+
+```
+db.books.update({"_id": "Homer"}, {$pop: {"books": 1}})
+```
+
+##### pull
+
+删除特定元素 模糊程度更高
+
+实例
+
+```
+db.books.update({"_id": "Homer"}, {$pull: {"books": {$regex: /ha/}}})
+```
+
+##### pullAll
+
+删除特定元素 相当于 pull + in
+
+##### push
+
+添加元素
 
 ### updateOne
 
