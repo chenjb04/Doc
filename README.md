@@ -43,4 +43,6 @@
 
 # go
 
-[1、go语言环境搭建.md](https://github.com/chenjb04/Doc/blob/master/go/go语言环境搭建.md)
+[1、go语言环境搭建](https://github.com/chenjb04/Doc/blob/master/go/go语言环境搭建.md)
+
+[2、第一个Go语言程序](https://github.com/chenjb04/Doc/blob/master/go/2、Go语言helloworld.md)
