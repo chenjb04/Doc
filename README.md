@@ -50,3 +50,5 @@
 [3、Go的执行原理和go命令](https://github.com/chenjb04/Doc/blob/master/go/3、go的执行原理和go命令.md)
 
 [4、Go语言变量常量](https://github.com/chenjb04/Doc/blob/master/go/4、Go语言变量常量.md)
+
+[5、Go语言数据类型](https://github.com/chenjb04/Doc/blob/master/go/5、Go语言数据类型.md)
