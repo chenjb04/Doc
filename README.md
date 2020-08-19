@@ -43,8 +43,10 @@
 
 # go
 
-[1、go语言环境搭建](https://github.com/chenjb04/Doc/blob/master/go/go语言环境搭建.md)
+[1、Go语言环境搭建](https://github.com/chenjb04/Doc/blob/master/go/go语言环境搭建.md)
 
 [2、第一个Go语言程序](https://github.com/chenjb04/Doc/blob/master/go/2、Go语言helloworld.md)
 
-[3、go的执行原理和go命令](https://github.com/chenjb04/Doc/blob/master/go/3、go的执行原理和go命令.md)
+[3、Go的执行原理和go命令](https://github.com/chenjb04/Doc/blob/master/go/3、go的执行原理和go命令.md)
+
+[4、Go语言变量常量](https://github.com/chenjb04/Doc/blob/master/go/4、Go语言变量常量.md)
