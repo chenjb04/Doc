@@ -54,3 +54,5 @@
 [5、Go语言数据类型](https://github.com/chenjb04/Doc/blob/master/go/5、Go语言数据类型.md)
 
 [6、Go语言运算符](https://github.com/chenjb04/Doc/blob/master/go/6、Go语言运算符.md)
+
+[7、Go语言键盘输入输出](https://github.com/chenjb04/Doc/blob/master/go/7、Go语言键盘输入输出.md)
