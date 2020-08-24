@@ -58,3 +58,5 @@
 [7、Go语言键盘输入输出](https://github.com/chenjb04/Doc/blob/master/go/7、Go语言键盘输入输出.md)
 
 [8、Go语言条件语句](https://github.com/chenjb04/Doc/blob/master/go/8、Go语言条件语句.md)
+
+[9、Go语言循环语句](https://github.com/chenjb04/Doc/blob/master/go/9、Go语言循环语句.md)
