@@ -132,3 +132,27 @@ func main() {
 
 ```
 
+## fallthrough
+
+贯通后续的case
+
+示例
+
+```go
+m := 2
+switch m {
+    case 1:
+    fmt.Println("num1")
+    case 2:
+    fmt.Println("num2")
+    fallthrough
+    case 3:
+    fmt.Println("num3")
+
+}
+/*
+num2
+num3
+*/
+```
+
