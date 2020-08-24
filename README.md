@@ -60,3 +60,5 @@
 [8、Go语言条件语句](https://github.com/chenjb04/Doc/blob/master/go/8、Go语言条件语句.md)
 
 [9、Go语言循环语句](https://github.com/chenjb04/Doc/blob/master/go/9、Go语言循环语句.md)
+
+[10、Go语言生成随机数](https://github.com/chenjb04/Doc/blob/master/go/10、Go语言生成随机数.md)
