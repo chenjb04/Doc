@@ -74,3 +74,5 @@
 [15、Go语言函数](https://github.com/chenjb04/Doc/blob/master/go/15、Go语言函数.md)
 
 [16、Go语言指针](https://github.com/chenjb04/Doc/blob/master/go/16、Go语言指针.md)
+
+[17、Go语言结构体](https://github.com/chenjb04/Doc/blob/master/go/17、Go语言结构体.md)
