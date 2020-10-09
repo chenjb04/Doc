@@ -7,30 +7,49 @@
  * @Last Modified time: 2020/9/29 14:08
  * @Desc: 线程间通信 队列
 """
+import random
 import threading
 import time
 from queue import Queue
 
 
-def producer():
-    for i in range(10):
-        data_queue.put(i)
-        print('production data ', i)
+class Producer(threading.Thread):
+    def __init__(self, queue):
+        super().__init__()
+        self.queue = queue
+
+    def run(self):
+        for i in range(10):
+            item = random.randint(0, 256)
+            self.queue.put(item)
+            print('Producer notify: item N° %d appended to queue by %s' % (item, self.name)
+                  )
+            time.sleep(1)
 
 
-def consumer():
-    while True:
-        i = data_queue.get()
-        data_queue.task_done()
-        print('threading {} consumer {}'.format(threading.current_thread().name, i))
+class Consumer(threading.Thread):
+    def __init__(self, queue):
+        super().__init__()
+        self.queue = queue
+
+    def run(self):
+        while 1:
+            item = self.queue.get()
+            print('Consumer notify : %d popped from queue by %s' % (item, self.name))
+            self.queue.task_done()
 
 
 if __name__ == '__main__':
-    data_queue = Queue(10)
-    for _ in range(3):
-        t = threading.Thread(target=consumer)
-        t.start()
-
-    for _ in range(1):
-        t = threading.Thread(target=producer)
-        t.start()
+    queue = Queue()
+    t1 = Producer(queue)
+    t2 = Consumer(queue)
+    t3 = Consumer(queue)
+    t4 = Consumer(queue)
+    t1.start()
+    t2.start()
+    t3.start()
+    t4.start()
+    t1.join()
+    t2.join()
+    t3.join()
+    t4.join()
