@@ -214,3 +214,64 @@ func main() {
 
 ### work模式
 
+一个生产者，多个消费者，每个消费者获取到的消息唯一，一个消息只能被消费一次，场景适用于负载均衡，当生产者速度大于消费者时。
+
+示例：
+
+生产者
+
+```go
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQSimple("simple")
+	for i := 0; i < 100; i++ {
+		rabbitmq.PublishSimple("hello world! " + strconv.Itoa(i))
+		time.Sleep(1 * time.Second)
+		fmt.Println(i)
+	}
+
+}
+```
+
+消费者1
+
+```go
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQSimple("simple")
+	rabbitmq.ConsumeSimple()
+}
+
+```
+
+消费者2
+
+```go
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQSimple("simple")
+	rabbitmq.ConsumeSimple()
+}
+
+```
+
+结果
+
+```go
+// 消费者1
+2020/10/28 20:35:44 [*] waiting for message, To exit press Ctrl + C
+2020/10/28 20:36:01 received a message:hello world! 0
+2020/10/28 20:36:03 received a message:hello world! 2
+2020/10/28 20:36:06 received a message:hello world! 4
+2020/10/28 20:36:08 received a message:hello world! 6
+2020/10/28 20:36:10 received a message:hello world! 8
+2020/10/28 20:36:12 received a message:hello world! 10
+...
+//消费者2
+2020/10/28 20:35:51 [*] waiting for message, To exit press Ctrl + C
+2020/10/28 20:36:02 received a message:hello world! 1
+2020/10/28 20:36:04 received a message:hello world! 3
+2020/10/28 20:36:07 received a message:hello world! 5
+2020/10/28 20:36:09 received a message:hello world! 7
+2020/10/28 20:36:11 received a message:hello world! 9
+2020/10/28 20:36:13 received a message:hello world! 11
+...
+```
+
