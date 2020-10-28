@@ -33,6 +33,10 @@
 
 [kafka使用SSL加密和认证](https://github.com/chenjb04/Doc/blob/master/kafka/kafka使用SSL加密和认证.md)
 
+# RabbitMQ
+
+[rabbitmq入门](https://github.com/chenjb04/doc/blob/master/rabbitmq/RabbitMQ.md)
+
 # MongoDB
 
 [mongodb基本操作](https://github.com/chenjb04/Doc/blob/master/MongoDB/mongodb基本操作.md)
