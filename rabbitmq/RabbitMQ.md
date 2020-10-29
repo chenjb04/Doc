@@ -532,3 +532,124 @@ func main() {
 2020/10/29 16:29:38 received a message:hello 9 from two
 ```
 
+### topic模式
+
+一个消息被多个消费者获取。消息的目标 queue 可用 bindingkey 以通配符（#：一个或者多个词，*: 一个词）的方式指定，根据传入的 key 进行模糊匹配 匹配到 key 之后就去找交换机上跟这个 key 绑定的队列去读取进行消费 当然匹配到可能多个 key 那么可能就会有多个队列被消费！
+
+1. 星号井号代表通配符
+2. 星号代表多个单词，井号代表一个单词
+3. 路由功能添加模糊匹配
+4. 消息产生者产生消息，把消息交给交换机
+5. 交换机根据 key 的规则模糊匹配到对应的队列，由队列的监听消费者接收消息消费
+
+示例：
+
+创建实例
+
+```go
+//topic模式创建实例
+func NewRabbitMQTopic(exchange string,  routingKey string) *RabbitMQ{
+	rabbitmq := NewRabbitMQ("", exchange, routingKey)
+	var err error
+	rabbitmq.conn, err = amqp.Dial(rabbitmq.MqUrl)
+	rabbitmq.failOnError(err, "failed to connect to rabbit")
+	rabbitmq.channel, err = rabbitmq.conn.Channel()
+	rabbitmq.failOnError(err, "failed to open a channel")
+	return rabbitmq
+}
+```
+
+生产者
+
+```go
+//topic模式生产者
+func (r *RabbitMQ) PublishTopic(message string) {
+	//创建交换机
+	err := r.channel.ExchangeDeclare(r.Exchange, "topic", true, false, false, false, nil)
+	r.failOnError(err, "failed to declare an exchange")
+	//发送消息
+	err = r.channel.Publish(r.Exchange, r.Key, false, false, amqp.Publishing{
+		ContentType: "text/plain", Body: []byte(message),
+	})
+}
+```
+
+消费者
+
+```go
+//topic模式消费者
+func (r *RabbitMQ) ConsumeTopic() {
+	//试探性创建交换机
+	err := r.channel.ExchangeDeclare(r.Exchange, "topic", true, false, false, false, nil)
+	r.failOnError(err, "failed to declare an exchange")
+	//创建队列
+	q, err := r.channel.QueueDeclare("", false, false, true, false, nil)
+	r.failOnError(err, "failed to declare an queue")
+	//绑定队列到exchange
+	err = r.channel.QueueBind(q.Name,r.Key, r.Exchange, false, nil)
+	r.failOnError(err, "build failed")
+	//消费消息
+	messages, err := r.channel.Consume(q.Name, "", true, false, false, false, nil)
+	forever := make(chan bool)
+	// 启用协程消费
+	go func() {
+		for d := range messages {
+			log.Printf("received a message:%s", d.Body)
+		}
+	}()
+	log.Printf("[*] waiting for message, To exit press Ctrl + C")
+	<-forever
+}
+```
+
+使用
+
+```go
+//生产者
+func main() {
+	one := RabbitMQ.NewRabbitMQTopic("topic", "topic1.go")
+	two := RabbitMQ.NewRabbitMQTopic("topic", "topic2")
+	for i := 0; i < 10; i++ {
+		one.PublishTopic("hello topic1" + strconv.Itoa(i))
+		two.PublishTopic("hello topic2" + strconv.Itoa(i))
+		time.Sleep(1 * time.Second)
+		fmt.Println(i)
+	}
+}
+//消费者1
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQTopic("topic", "#")
+	rabbitmq.ConsumeTopic()
+
+}
+//消费者2
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQTopic("topic", "*.go")
+	rabbitmq.ConsumeTopic()
+
+}
+```
+
+结果
+
+```go
+//消费者1
+2020/10/29 18:54:04 received a message:hello topic1 0
+2020/10/29 18:54:04 received a message:hello topic2 0
+2020/10/29 18:54:05 received a message:hello topic1 1
+2020/10/29 18:54:05 received a message:hello topic2 1
+2020/10/29 18:54:06 received a message:hello topic1 2
+2020/10/29 18:54:06 received a message:hello topic2 2
+2020/10/29 18:54:07 received a message:hello topic1 3
+2020/10/29 18:54:07 received a message:hello topic2 3
+...
+//消费者2
+2020/10/29 18:54:04 received a message:hello topic1 0
+2020/10/29 18:54:05 received a message:hello topic1 1
+2020/10/29 18:54:06 received a message:hello topic1 2
+2020/10/29 18:54:07 received a message:hello topic1 3
+...
+```
+
+
+
