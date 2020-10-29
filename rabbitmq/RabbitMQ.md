@@ -275,3 +275,260 @@ func main() {
 ...
 ```
 
+### 订阅模式
+
+一条消息可以被多个消费者消费
+
+示例：
+
+创建实例
+
+```go
+//创建订阅模式RabbitMQ示例
+func NewRabbitMQPubSub(exchangeName string) *RabbitMQ {
+	// 创建RabbitMQ示例
+	rabbitmq := NewRabbitMQ("", exchangeName, "")
+	var err error
+	rabbitmq.conn, err = amqp.Dial(rabbitmq.MqUrl)
+	rabbitmq.failOnError(err, "failed to connect to rabbit")
+	rabbitmq.channel, err = rabbitmq.conn.Channel()
+	rabbitmq.failOnError(err, "failed to open a channel")
+	return rabbitmq
+}
+```
+
+生产者
+
+```go
+// 订阅模式生产者
+func (r *RabbitMQ) PublishPub(message string) {
+	//尝试创建交换机
+	// kind 交换机类型 durable 是否持久化 autoDelete 是否自动删除 internal true表示这个exchange不可以被client用来推送消息，仅用来进行exchange之间的绑定
+	// nowait 是否阻塞
+	err := r.channel.ExchangeDeclare(r.Exchange, "fanout", true, false, false, false, nil)
+	r.failOnError(err, "failed to declare an exchange")
+	// 发送消息
+	err = r.channel.Publish(r.Exchange, "", false, false, amqp.Publishing{
+		ContentType: "text/plain", Body: []byte(message),
+	})
+
+}
+```
+
+消费者
+
+```go
+//订阅模式消费者
+func (r *RabbitMQ) ConsumeSub() {
+	//试探性创建交换机
+	err := r.channel.ExchangeDeclare(r.Exchange, "fanout", true, false, false, false, nil)
+	r.failOnError(err, "failed to declare an exchange")
+	//创建队列
+	q, err := r.channel.QueueDeclare("", false, false, true, false, nil)
+	r.failOnError(err, "failed to declare an queue")
+	//绑定队列到exchange
+	err = r.channel.QueueBind(q.Name, "", r.Exchange, false, nil)
+	r.failOnError(err, "build failed")
+	//消费消息
+	messages, err := r.channel.Consume(q.Name, "", true, false,  false, false, nil)
+	forever := make(chan bool)
+	// 启用协程消费
+	go func() {
+		for d := range messages {
+			log.Printf("received a message:%s", d.Body)
+		}
+	}()
+	log.Printf("[*] waiting for message, To exit press Ctrl + C")
+	<-forever
+
+
+}
+```
+
+使用
+
+```go
+// 生产者
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQPubSub("newProduct")
+	for i := 0; i < 10; i++ {
+		rabbitmq.PublishPub("订阅模式生产第" + strconv.Itoa(i) + "条数据")
+		fmt.Println("订阅模式生产第" + strconv.Itoa(i) + "条数据")
+		time.Sleep(1 * time.Second)
+	}
+}
+//消费者1
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQPubSub("newProduct")
+	rabbitmq.ConsumeSub()
+}
+//消费者2
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQPubSub("newProduct")
+	rabbitmq.ConsumeSub()
+}
+```
+
+结果
+
+```go
+//生产者
+订阅模式生产第0条数据
+订阅模式生产第1条数据
+订阅模式生产第2条数据
+订阅模式生产第3条数据
+订阅模式生产第4条数据
+订阅模式生产第5条数据
+订阅模式生产第6条数据
+订阅模式生产第7条数据
+订阅模式生产第8条数据
+订阅模式生产第9条数据
+//消费者1
+2020/10/29 15:37:07 [*] waiting for message, To exit press Ctrl + C
+2020/10/29 15:37:14 received a message:订阅模式生产第0条数据
+2020/10/29 15:37:15 received a message:订阅模式生产第1条数据
+2020/10/29 15:37:16 received a message:订阅模式生产第2条数据
+2020/10/29 15:37:17 received a message:订阅模式生产第3条数据
+2020/10/29 15:37:18 received a message:订阅模式生产第4条数据
+2020/10/29 15:37:19 received a message:订阅模式生产第5条数据
+2020/10/29 15:37:20 received a message:订阅模式生产第6条数据
+2020/10/29 15:37:21 received a message:订阅模式生产第7条数据
+2020/10/29 15:37:22 received a message:订阅模式生产第8条数据
+2020/10/29 15:37:23 received a message:订阅模式生产第9条数据
+//消费者2
+2020/10/29 15:37:11 [*] waiting for message, To exit press Ctrl + C
+2020/10/29 15:37:14 received a message:订阅模式生产第0条数据
+2020/10/29 15:37:15 received a message:订阅模式生产第1条数据
+2020/10/29 15:37:16 received a message:订阅模式生产第2条数据
+2020/10/29 15:37:17 received a message:订阅模式生产第3条数据
+2020/10/29 15:37:18 received a message:订阅模式生产第4条数据
+2020/10/29 15:37:19 received a message:订阅模式生产第5条数据
+2020/10/29 15:37:20 received a message:订阅模式生产第6条数据
+2020/10/29 15:37:21 received a message:订阅模式生产第7条数据
+2020/10/29 15:37:22 received a message:订阅模式生产第8条数据
+2020/10/29 15:37:23 received a message:订阅模式生产第9条数据
+```
+
+### 路由模式
+
+一个消息可以被多个消费者消费。并且消息的目标队列可被生产者指定。
+
+示例：
+
+创建实例：
+
+```go
+// 路由模式创建RabbitMQ实例
+func NewRabbitMQRouting(exchangeName string, routingKey string) *RabbitMQ {
+	rabbitmq := NewRabbitMQ("", exchangeName, routingKey)
+	var err error
+	rabbitmq.conn, err = amqp.Dial(rabbitmq.MqUrl)
+	rabbitmq.failOnError(err, "failed to connect to rabbit")
+	rabbitmq.channel, err = rabbitmq.conn.Channel()
+	rabbitmq.failOnError(err, "failed to open a channel")
+	return rabbitmq
+}
+```
+
+生产者
+
+```go
+//路由模式生产者
+func (r *RabbitMQ) PublishRouting(message string) {
+	//创建交换机
+	err := r.channel.ExchangeDeclare(r.Exchange, "direct", true, false, false, false, nil)
+	r.failOnError(err, "failed to declare an exchange")
+	//发送消息
+	err = r.channel.Publish(r.Exchange, r.Key, false, false, amqp.Publishing{
+		ContentType: "text/plain", Body: []byte(message),
+	})
+}
+```
+
+消费者
+
+```go
+//路由模式消费者
+func (r *RabbitMQ) ConsumeRouting() {
+	//试探性创建交换机
+	err := r.channel.ExchangeDeclare(r.Exchange, "direct", true, false, false, false, nil)
+	r.failOnError(err, "failed to declare an exchange")
+	//创建队列
+	q, err := r.channel.QueueDeclare("", false, false, true, false, nil)
+	r.failOnError(err, "failed to declare an queue")
+	//绑定队列到exchange
+	err = r.channel.QueueBind(q.Name, r.Key, r.Exchange, false, nil)
+	r.failOnError(err, "build failed")
+	//消费消息
+	messages, err := r.channel.Consume(q.Name, "", true, false, false, false, nil)
+	forever := make(chan bool)
+	// 启用协程消费
+	go func() {
+		for d := range messages {
+			log.Printf("received a message:%s from %s", d.Body, r.Key)
+		}
+	}()
+	log.Printf("[*] waiting for message, To exit press Ctrl + C")
+	<-forever
+
+}
+```
+
+使用
+
+```go
+//生产者
+func main() {
+	one := RabbitMQ.NewRabbitMQRouting("routing", "one")
+	two := RabbitMQ.NewRabbitMQRouting("routing", "two")
+	for i := 0; i < 10; i++ {
+		one.PublishRouting("hello " + strconv.Itoa(i))
+		two.PublishRouting("hello " + strconv.Itoa(i))
+		time.Sleep(1 * time.Second)
+		fmt.Println(i)
+	}
+}
+//消费者1
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQRouting("routing", "one")
+	rabbitmq.ConsumeRouting()
+
+}
+
+//消费者2
+func main() {
+	rabbitmq := RabbitMQ.NewRabbitMQRouting("routing", "two")
+	rabbitmq.ConsumeRouting()
+
+}
+```
+
+结果
+
+```go
+//消费者1
+2020/10/29 16:29:25 [*] waiting for message, To exit press Ctrl + C
+2020/10/29 16:29:28 received a message:hello 0 from one
+2020/10/29 16:29:29 received a message:hello 1 from one
+2020/10/29 16:29:30 received a message:hello 2 from one
+2020/10/29 16:29:31 received a message:hello 3 from one
+2020/10/29 16:29:33 received a message:hello 4 from one
+2020/10/29 16:29:34 received a message:hello 5 from one
+2020/10/29 16:29:35 received a message:hello 6 from one
+2020/10/29 16:29:36 received a message:hello 7 from one
+2020/10/29 16:29:37 received a message:hello 8 from one
+2020/10/29 16:29:38 received a message:hello 9 from one
+//消费者2
+2020/10/29 16:29:23 [*] waiting for message, To exit press Ctrl + C
+2020/10/29 16:29:28 received a message:hello 0 from two
+2020/10/29 16:29:29 received a message:hello 1 from two
+2020/10/29 16:29:30 received a message:hello 2 from two
+2020/10/29 16:29:32 received a message:hello 3 from two
+2020/10/29 16:29:33 received a message:hello 4 from two
+2020/10/29 16:29:34 received a message:hello 5 from two
+2020/10/29 16:29:35 received a message:hello 6 from two
+2020/10/29 16:29:36 received a message:hello 7 from two
+2020/10/29 16:29:37 received a message:hello 8 from two
+2020/10/29 16:29:38 received a message:hello 9 from two
+```
+
